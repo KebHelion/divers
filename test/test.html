@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Test</title>
+<script>
+    function send(info){
+             EventBridge.emitWebEvent(JSON.stringify(info));
+             alert(JSON.stringify(info));
+    }
+</script>
+</head>
+    <body>
+        <a href="#" onClick='send("Data!");'>TEST</a>	
+    </body>
+</html>
