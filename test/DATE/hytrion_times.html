@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>HYTRION Times</title>
+        <style>
+        body {
+            background: #615d73;
+        }
+        h1 {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 24px;
+            color: #808080;
+        }
+        td.hytrion {
+            width: 50%;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            color: #FFFFFF;
+            font-weight: 700;
+            text-decoration: none;
+            font-style: normal;
+            font-variant: normal;
+            text-transform: none;
+            background: #000000;
+            padding: 10px;
+            vertical-align: top;
+        }
+        td.rl {
+            width: 50%;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+            color: #000000;
+            font-weight: 700;
+            text-decoration: none;
+            font-style: normal;
+            font-variant: normal;
+            text-transform: none;
+            background: #FFFFFF;
+            padding: 10px;
+            vertical-align: top;
+        }
+        font.smaller {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            font-style: italic;
+            font-variant: normal;
+            text-transform: none;
+        }  
+        div.section {
+            width: 100%;
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 30px;
+            color: #9c97a8;
+            font-weight: 700;
+            text-decoration: none;
+            font-style: normal;
+            font-variant: normal;
+            text-transform: none;
+            text-align: center;
+            padding: 2px;
+        }        
+        </style>
+        <link  href="dist/picker.css" rel="stylesheet">
+        <script src="dist/picker.js"></script>     
+        <script> 
+    
+
+
+
+    var is24 = false;
+    var DAY_DURATION = 68400; //19h
+    var WEEK_DURATION = 615600; //9 days of 19h
+    var YEAR_DURATION = 3600 * 19 * 36 * 10; //10 months of 36 days de 19h
+    var MONTH_DURATION = 3600 * 19 * 36; //36 days de 19h
+    var HOUR_DURATION = 2850;
+    var MINUTE_DURATION = 47.5;    
+    
+    var weekDaysNames = [
+        "Virmonday",
+        "Virtuesday",
+        "Virwednesday",
+        "Virthursday",
+        "Virfriday",
+        "Friturday",
+        "Virsaturday",
+        "Sameday",
+        "Virsunday"
+    ];
+
+    var monthsNames = [
+        "Primum",
+        "Secundum",
+        "Tertium",
+        "Quartum",
+        "Quintilis",
+        "Sextilis",
+        "September",
+        "October",
+        "November",
+        "December"
+    ];    
+    
+
+
+   
+
+   function getHytrionTimeString(timestamp) {
+     
+            var timeInfo = getHourFromSec(GetCurrentCycleValue(8640000, DAY_DURATION, timestamp)/100);
+            var curDayOfWeek = weekDaysNames[Math.floor(GetCurrentCycleValue(9, WEEK_DURATION, timestamp))];
+            
+            var secSince1970 = timestamp/1000;
+            
+            var curYear = Math.ceil(secSince1970 / YEAR_DURATION);
+            
+            var curMonth = monthsNames[Math.floor(GetCurrentCycleValue(10, YEAR_DURATION, timestamp))];
+            
+            var curDayOfMonth = 1 + Math.floor(GetCurrentCycleValue(36, MONTH_DURATION, timestamp));
+            
+            var displayText = "<table style='width:100%;'><tr><td><BR>" + curDayOfWeek + "<br>" + curMonth + " " + curDayOfMonth + ", " + curYear + "<br>" + timeInfo + "</td></tr></Table>";
+
+            return displayText;
+          
+    }        
+
+   function getRealTimeString(timestamp) {
+
+            var weekday = [
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday"
+                ];
+
+            var month_rl = [
+                "January",
+                "February",
+                "March",
+                "April",
+                "May",
+                "June",
+                "July",
+                "August",
+                "September",
+                "October",
+                "November",
+                "December"
+                ];    
+                
+            var thisTime = new Date(timestamp);
+            
+            var hrs = thisTime.getHours();
+            var mts = thisTime.getMinutes();
+            var timeInfo = getHourFromHourAndMinutes(hrs, mts);
+            var curDayOfWeek = weekday[thisTime.getDay()];           
+            var curYear = thisTime.getFullYear();
+            var curMonth = month_rl[thisTime.getMonth()];
+            var curDayOfMonth = thisTime.getDate();
+            
+            var Uhrs = thisTime.getUTCHours();
+            var Umts = thisTime.getUTCMinutes();
+            var UtimeInfo = getHourFromHourAndMinutes(Uhrs, Umts);
+            var UcurDayOfWeek = weekday[thisTime.getUTCDay()];           
+            var UcurYear = thisTime.getUTCFullYear();
+            var UcurMonth = month_rl[thisTime.getUTCMonth()];
+            var UcurDayOfMonth = thisTime.getUTCDate();
+            
+            var displayText = "<table style='width:100%;'><tr><td><font style='font-weight:500;color:#adadad;'>LOCAL</font><br>" + curDayOfWeek + "<br>" + curMonth + " " + curDayOfMonth + ", " + curYear + "<br>" + timeInfo + "</td>";
+            displayText = displayText + "<td><font style='font-weight:500;color:#adadad;'>UTC</font><br>" + UcurDayOfWeek + "<br>" + UcurMonth + " " + UcurDayOfMonth + ", " + UcurYear + "<br>" + UtimeInfo + "</td></tr></Table>";   
+            return displayText;            
+   }
+
+    function GetCurrentCycleValue(cyclelength, cycleduration, tstamp){
+
+		var TodaySec = tstamp/1000;
+		var CurrentSec = TodaySec%cycleduration;
+		
+		return (CurrentSec/cycleduration)*cyclelength;
+		
+	}
+
+	/*
+     * Converts an HSL color value to RGB. Conversion formula
+     * adapted from http://en.wikipedia.org/wiki/HSL_color_space.
+     * Assumes h, s, and l are contained in the set [0, 1] and
+     * returns r, g, and b in the set [0, 255].
+     *
+     * @param   {number}  h       The hue
+     * @param   {number}  s       The saturation
+     * @param   {number}  l       The lightness
+     * @return  {Array}           The RGB representation
+     */
+    function hslToRgb(h, s, l){
+        var r, g, b;
+
+        if(s == 0){
+            r = g = b = l; // achromatic
+        }else{
+            var hue2rgb = function hue2rgb(p, q, t){
+                if(t < 0) t += 1;
+                if(t > 1) t -= 1;
+                if(t < 1/6) return p + (q - p) * 6 * t;
+                if(t < 1/2) return q;
+                if(t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+                return p;
+            }
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1/3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1/3);
+        }
+
+        return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
+    }
+
+    //#####################################
+    function getHourFromSec(daysec){
+        var hours = Math.floor(daysec/3600);
+        var minutes = Math.floor(daysec/60) - (hours * 60);
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var hoursTwelve = hours % 12;
+        hoursTwelve = hoursTwelve ? hoursTwelve : 12; // the hour '0' should be '12'
+        
+        var minuteZeroized = minutes <= 9 ? '0' + minutes : '' + minutes;
+        /*
+        if (is24 == true) {
+            return hours + ":" + minuteZeroized;
+        }else{
+            return hoursTwelve + ":" + minuteZeroized + " " + ampm
+        }
+        */
+        return hoursTwelve + ":" + minuteZeroized + " " + ampm + " <font class='smaller'>(" + hours + ":" + minuteZeroized + ")</font>"
+        
+    }
+
+    function getHourFromHourAndMinutes(hours, minutes){
+
+        var ampm = hours >= 12 ? 'PM' : 'AM';
+        var hoursTwelve = hours % 12;
+        hoursTwelve = hoursTwelve ? hoursTwelve : 12; // the hour '0' should be '12'
+        
+        var minuteZeroized = minutes <= 9 ? '0' + minutes : '' + minutes;
+        /*
+        if (is24 == true) {
+            return hours + ":" + minuteZeroized;
+        }else{
+            return hoursTwelve + ":" + minuteZeroized + " " + ampm
+        }
+        */
+        return hoursTwelve + ":" + minuteZeroized + " " + ampm + " <font class='smaller'>(" + hours + ":" + minuteZeroized + ")</font>"
+    }
+
+
+    function computeHytrion() {
+    
+        var Hyear = document.hytrionForm.year.value - 1;
+        var Hmont = document.hytrionForm.month.value;
+        var Hday = document.hytrionForm.day.value - 1;
+        var Hhour = document.hytrionForm.hour.value;
+        var Hminute = document.hytrionForm.minute.value;
+        var stamp = ((Hyear * YEAR_DURATION) + ( Hmont * MONTH_DURATION) + (Hday * DAY_DURATION) + (Hhour * HOUR_DURATION) + (Hminute * MINUTE_DURATION))* 1000;
+        updateConverted(stamp);
+    }
+    
+    function computeRL() {
+    
+        var dateString = document.realForm.rlTime.value;
+        var stamp = Date.parse(dateString);
+        updateConverted(stamp);
+    }    
+</script>
+    </head>
+<body>
+
+<table style="width:100%; ">
+<tr>
+<td class ="rl">
+<h1>REALITY CURRENT TIME</h1>
+<div id = "curtime_rl"></div>
+</td>
+<td class ="hytrion">
+<h1>HYTRION CURRENT TIME</h1>
+<div id = "curtime_hytrion"></div>
+</td>
+</tr>
+<table><br>
+<div class='section'>TIME CONVERTER</div>
+<table style="width:100%; ">
+<tr>
+<td class ="rl">
+<h1>REALITY TIME</h1>
+<div id = "cvrt_time_rl"></div>
+<hr>
+<!-- ############################################################ -->
+<form name = "realForm">
+    Select a Date and Time: <input id="rlTime" name="rlTime" type="text" class="form-control js-full-picker" value="" onchange = "computeRL();">
+
+</form>
+<!-- ############################################################ -->
+
+
+</td>
+<td class ="hytrion">
+<h1>HYTRION TIME</h1>
+<div id = "cvrt_hytrion"></div>
+<hr>
+<form name = 'hytrionForm'>
+Day: <select name= 'day' onchange = 'computeHytrion();'><script>
+var auj = new Date();
+for (var ii = 1; ii < 37; ii++) {
+    if ((1 + Math.floor(GetCurrentCycleValue(36, MONTH_DURATION, auj.getTime()))) == ii) {
+        document.write("<option value = '" + ii + "' selected>" + ii + "</option>");
+    }else{
+        document.write("<option value = '" + ii + "'>" + ii + "</option>");
+    }
+}
+</script></select>
+Month: <select name= 'month' onchange = 'computeHytrion();'><script>
+for (ii = 0; ii < 10; ii++) {
+    if (Math.floor(GetCurrentCycleValue(10, YEAR_DURATION, auj.getTime())) == ii) {
+        document.write("<option value = '" + ii + "' selected>" + monthsNames[ii] + "</option>");
+    }else{
+        document.write("<option value = '" + ii + "'>" + monthsNames[ii] + "</option>");
+    }
+}
+</script></select>
+Year: <input name = "year" type = "text" size = "5" onkeyup = 'computeHytrion();'>
+<br>
+Hours: <select name= 'hour' onchange = 'computeHytrion();'><script>
+for (ii = 0; ii < 24; ii++) {
+    if (Math.floor(GetCurrentCycleValue(86400, DAY_DURATION, auj.getTime())/3600) == ii) {
+        document.write("<option value = '" + ii + "' selected>" + ii + "</option>");
+    }else{
+        document.write("<option value = '" + ii + "'>" + ii + "</option>");
+    }
+}
+</script>
+</select> : <select name= 'minute' onchange = 'computeHytrion();'><script>
+for (ii = 0; ii < 60; ii++) {
+    if ((Math.floor(GetCurrentCycleValue(86400, DAY_DURATION, auj.getTime())/60) - (Math.floor(GetCurrentCycleValue(86400, DAY_DURATION, auj.getTime())/3600) * 60)) == ii) {
+        document.write("<option value = '" + ii + "' selected>" + ii + "</option>");
+    }else{
+        document.write("<option value = '" + ii + "'>" + ii + "</option>");
+    }
+}
+</script></select>
+</form>
+</td>
+</tr>
+<table>
+<script>
+    document.hytrionForm.year.value = Math.ceil((auj.getTime()/1000)/YEAR_DURATION);
+    
+    var UPDATE_TIMER_INTERVAL = 45000; //each 45 sec timer
+
+    updateClock();
+    computeHytrion();
+    
+    var processTimer = setInterval(function(){ 
+        updateClock(); 
+ 
+    }, UPDATE_TIMER_INTERVAL);
+
+
+
+    
+    function updateClock() {
+               
+            var today = new Date();
+
+            document.getElementById("curtime_hytrion").innerHTML = getHytrionTimeString(today.getTime());
+            document.getElementById("curtime_rl").innerHTML = getRealTimeString(today.getTime());
+          
+    } 
+    
+    function updateConverted(tstamp) {
+
+            document.getElementById("cvrt_hytrion").innerHTML = getHytrionTimeString(tstamp);
+            document.getElementById("cvrt_time_rl").innerHTML = getRealTimeString(tstamp);
+          
+    }   
+
+    new Picker(document.querySelector('.js-full-picker'), {
+      controls: true,
+      format: 'YYYY-MM-DD HH:mm', //format: 'YYYY-MM-DD HH:mm:ss.SSS',
+      headers: true,
+    });    
+    </script>
+</body>
+
+</html>
