@@ -18,6 +18,90 @@
     var NUMBER_OF_COMPLEX_SYSTEM = 77;// over 125
     var NBR_PLANET_PER_SYSTEM = 25;
     //##############################
+    var planetType = [
+         {
+           "type": "Shape",
+           "shape": "Cube",
+           "url": "",
+           "disform": false,
+           "rotation": "none",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Sphere",
+           "url": "",
+           "disform": false,
+           "rotation": "none",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Cube",
+           "url": "",
+           "disform": true,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Cube",
+           "url": "",
+           "disform": true,
+           "rotation": "none",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Sphere",
+           "url": "",
+           "disform": true,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Tetrahedron",
+           "url": "",
+           "disform": false,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Octahedron",
+           "url": "",
+           "disform": false,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Icosahedron",
+           "url": "",
+           "disform": true,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Dodecahedron",
+           "url": "",
+           "disform": true,
+           "rotation": "free",
+           "astroid": false
+         },
+         {
+           "type": "Shape",
+           "shape": "Dodecahedron", //FALSE ASTROID To NOT CRASH THE SCRIPT FOR NOW.
+           "url": "",
+           "disform": true,
+           "rotation": "free",
+           "astroid": true 
+         }         
+        ];
+    
+    //##############################
     
     var planetarNamePattern = ["name", "numeric", "roman", "greek"];
     
@@ -219,6 +303,15 @@
         //SIZE DEFINITION
         var sizeDefinition = genSizeDefinition();
         
+        var typeOfplanet = 999; // full random
+        if (rnd() < 0.7) {
+            typeOfplanet = 777; // random type astroid only
+        } else {
+            if (rnd() < 0.8) {
+                typeOfplanet = Math.floor(Math.random() * planetType.length); // a specific type
+            }
+        }
+        
         var alpha;
         for (nbrPl = 0; nbrPl < NBR_PLANET_PER_SYSTEM; nbrPl++) {
             if (nbrPl == 0){
@@ -232,7 +325,7 @@
                 "z": systemInfo.position.z + (Math.random() * (STELLAR_MAX_SIZE * 2)) - STELLAR_MAX_SIZE 
             };
             
-            CreatePlanet(plPosition, {"name": parentName, "namePattern": "name", "sequence": (nbrPl + 1), "sizeDefinition": sizeDefinition,"isAlpha": alpha});
+            CreatePlanet(plPosition, {"name": parentName, "namePattern": "name", "sequence": (nbrPl + 1), "sizeDefinition": sizeDefinition,"isAlpha": alpha, "typeOfplanet": typeOfplanet});
             
         }
     }
@@ -242,6 +335,15 @@
         var parentName = generatePlanetName();
         var patt = shuffle(planetarNamePattern);
         var parentNamePattern = patt[0];
+        
+        var typeOfplanet = 999; // full random
+        if (rnd() < 0.7) {
+            typeOfplanet = 777; // random type astroid only
+        } else {
+            if (rnd() < 0.8) {
+                typeOfplanet = Math.floor(Math.random() * planetType.length); // a specific type
+            }
+        }        
         
         //SIZE DEFINITION
         var sizeDefinition = genSizeDefinition();
@@ -280,7 +382,7 @@
             }
             plPosition = GetAplanetarPosition(systemInfo.position, parentData); //parentData call have infor about range of azimut and elevation
             
-            CreatePlanet(plPosition, {"name": parentName, "namePattern": parentNamePattern, "sequence": (nbrPl + 1), "sizeDefinition": sizeDefinition, "isAlpha": alpha});
+            CreatePlanet(plPosition, {"name": parentName, "namePattern": parentNamePattern, "sequence": (nbrPl + 1), "sizeDefinition": sizeDefinition, "isAlpha": alpha, "typeOfplanet": typeOfplanet});
             
         }
             
@@ -357,15 +459,38 @@
         if (parentSystemInfo.isAlpha == true) {
             planetSize = planetSize * parentSystemInfo.sizeDefinition.alphaFactor;
         }
+
+        var thisPlanetType;
+        if (parentSystemInfo.typeOfplanet == 999) {
+            
+            thisPlanetType = planetType[Math.floor(Math.random() * planetType.length)];
+        }else{
+            if (parentSystemInfo.typeOfplanet == 777) {
+                do{
+                    thisPlanetType = planetType[Math.floor(Math.random() * planetType.length)];
+                }while(thisPlanetType.astroid != true)
+            
+            }else{
+                thisPlanetType = planetType[parentSystemInfo.typeOfplanet];
+            }              
+        }
         
         //Disformation Ratio
         var disformation = {"x": 1, "y": 1, "z": 1};
-        /*
-        if (??? planet type.variable ??? == true) {
+        if (thisPlanetType.disform == true) {
             disformation = genDisformationRatio();
         }
-        */
-        //==========
+        
+        //Rotation
+        var planetRotation = Quat.IDENTITY;
+        if (thisPlanetType.rotation == "free") {
+            planetRotation = Quat.fromVec3Degrees({"x": (Math.random() * 360), "y": (Math.random() * 360), "z": (Math.random() * 360)});    
+        }
+        if (thisPlanetType.rotation == "ortho") {
+           planetRotation = Quat.fromVec3Degrees({"x": (90 * Math.floor((Math.random() * 4))), "y": (90 * Math.floor((Math.random() * 4))), "z": (90 * Math.floor((Math.random() * 4)))});
+        }        
+        
+        //ICI ON GERE LE TYPE... qui va generé des entité different pour Shape and Model
         
         var marker = Entities.addEntity({
             "type": "Box",
@@ -376,6 +501,7 @@
                 "z": planetSize * disformation.z
             },
             "position": planetPosition,
+            "rotation": planetRotation,
             "renderWithZones": zoneslist,
             "color": {
                 "red": 0.03,
