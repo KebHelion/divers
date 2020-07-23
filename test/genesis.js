@@ -303,6 +303,22 @@
         };
         return definition;
     }
+
+    function genDisformationRatio() {
+        var defRx = 0.2 + (Math.random() * 1.8);
+        
+        var nextPossible = 3 - defRx - 0.2;
+        //if (nextPossible < 0.6) {nextPossible = 1;}
+        
+        var defRy = 0.2 + (Math.random() * (nextPossible - 0.2));
+        
+        var defRz = 3 - defRx - defRy;
+        
+        var mixer = [defRx, defRy, defRz];
+        mixer = shuffle(mixer);
+
+        return {"x": mixer[0], "y": mixer[1], "z": mixer[2]};
+    }
     
     function CreatePlanet(planetPosition, parentSystemInfo){
         var stellarNo, zoneslist, planetName; 
@@ -342,15 +358,22 @@
             planetSize = planetSize * parentSystemInfo.sizeDefinition.alphaFactor;
         }
         
+        //Disformation Ratio
+        var disformation = {"x": 1, "y": 1, "z": 1};
+        /*
+        if (??? planet type.variable ??? == true) {
+            disformation = genDisformationRatio();
+        }
+        */
         //==========
         
         var marker = Entities.addEntity({
             "type": "Box",
             "name": planetName,
             "dimensions": {
-                "x": planetSize,
-                "y": planetSize,
-                "z": planetSize
+                "x": planetSize * disformation.x,
+                "y": planetSize * disformation.y,
+                "z": planetSize * disformation.z
             },
             "position": planetPosition,
             "renderWithZones": zoneslist,
