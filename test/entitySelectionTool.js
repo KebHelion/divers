@@ -64,11 +64,12 @@ function getDuplicateAppendedName(name) {
         }
     }
     if (existingSequence === 0) {
-        return rippedName.trim() + " (2)";
+        rippedName = rippedName.trim() + " (2)";
     } else {
         existingSequence++;
-        return rippedName.trim() + " (" + existingSequence + ")";
+        rippedName = rippedName.trim() + " (" + existingSequence + ")";
     }
+    return rippedName.trim();
 }
 
 SelectionManager = (function() {
