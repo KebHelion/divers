@@ -15,12 +15,13 @@
     var ASTROLITH_URL = "http://metaverse.bashora.com/scripts/hytrion_cloud/ASTROLITHE.png";
     
     var AIR_SOUND = "http://metaverse.bashora.com/scripts/hytrion_cloud/air.mp3";
-    var airSound, injector;
+    var airSound, injector;    
     var playing = 0;
 
     var UNIVERSE_SOUND = "http://metaverse.bashora.com/explore/limboAmbience.mp3"; //COPY IT LOCALLY ????????
     var UNIVERSE_SOUND_VOLUME_MAXIMUM = 0.2;
     var universeSound, universeSoundInjector;
+    var univerSoundPlaying = 0;
     var blindspots = [
         {
             "name": "DEMO",
@@ -86,12 +87,8 @@
 
         isInitiated = true; 
  
-        universeSoundInjector = Audio.playSound(universeSound, {
-            "loop": true,
-            "localOnly": true,
-            "volume": 0;
-            });
- 
+        univerSoundPlaying = 0;
+        
 		var today = new Date();
         processTimer = today.getTime();
         Script.update.connect(myTimer);        
@@ -217,7 +214,23 @@
                     }
                 }
             }
-            universeSoundInjector.setOptions({"volume": universeVolume});
+            if (univerSoundPlaying == 1) {
+                if (universeVolume > 0) {
+                    universeSoundInjector.setOptions({"volume": universeVolume});
+                } else {
+                    universeSoundInjector.stop();
+                    univerSoundPlaying = 0;
+                }
+            } else {
+                if (universeVolume > 0) {
+                    universeSoundInjector = Audio.playSound(universeSound, {
+                            "loop": true,
+                            "localOnly": true,
+                            "volume": universeVolume;
+                            });
+                    univerSoundPlaying = 1;
+                }   
+            }
             // ######### END UNIVERSE SOUD VOLUME MANAGEMENT ########
         }
     } 
