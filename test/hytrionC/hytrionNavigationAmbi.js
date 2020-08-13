@@ -1,5 +1,5 @@
 //#####################
-// HYTRION NAVIGATOR
+// HYTRION NAVIGATOR AND AMBIENT UNIVERSE SOUND
 // Alezia Kurdis
 // August 2020.
 //#####################
