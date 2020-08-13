@@ -8,7 +8,7 @@
     var universeDimension;
     var DEGREES_TO_RADIANS = Math.PI / 180.0;
     var HALF = 0.5;
-    var UPDATE_TIMER_INTERVAL = 1000; // 1 sec (was 1500 before)
+    var UPDATE_TIMER_INTERVAL = 1000; // 1 sec 
     var processTimer = 0;
 
     var astrolithID = Uuid.NULL;
@@ -17,7 +17,24 @@
     var AIR_SOUND = "http://metaverse.bashora.com/scripts/hytrion_cloud/air.mp3";
     var airSound, injector;
     var playing = 0;
+
+    var UNIVERSE_SOUND = "http://metaverse.bashora.com/explore/limboAmbience.mp3"; //COPY IT LOCALLY ????????
+    var UNIVERSE_SOUND_VOLUME_MAXIMUM = 0.2;
+    var universeSound, universeSoundInjector;
+    var blindspots = [
+        {
+            "name": "DEMO",
+            "position": {
+                "x": 0,
+                "y": 10,
+                "z": 5,
+             },
+            "occultationRadius": 40,
+            "influenceRadius": 150
+        }
+    ];
     
+   
     this.preload = function(entityID) {
         if (!isInitiated){
             if (positionIsInsideEntityBounds(entityID, MyAvatar.position)) {
@@ -25,6 +42,7 @@
             }
         }       
         airSound = SoundCache.getSound(AIR_SOUND);
+        universeSound = SoundCache.getSound(UNIVERSE_SOUND);        
     };
 
     this.enterEntity = function(entityID) {
@@ -56,7 +74,8 @@
             if (astrolithID != Uuid.NULL){
                 Entities.deleteEntity(astrolithID);
                 astrolithID = Uuid.NULL;
-            }      
+            }
+            universeSoundInjector.stop();
         }
     }
 
@@ -66,7 +85,13 @@
         universeDimension = properties.dimensions;
 
         isInitiated = true; 
-        
+ 
+        universeSoundInjector = Audio.playSound(universeSound, {
+            "loop": true,
+            "localOnly": true,
+            "volume": 0;
+            });
+ 
 		var today = new Date();
         processTimer = today.getTime();
         Script.update.connect(myTimer);        
@@ -176,6 +201,21 @@
                     astrolithID = Uuid.NULL;
                 }
             }
+            
+            //######### UNIVERSE SOUD VOLUME MANAGEMENT ##############
+            var universeVolume = UNIVERSE_SOUND_VOLUME_MAXIMUM;
+            var volumeEval, distEval;
+            for (var b = 0; b < blindspots.length; b++) {
+                distEval = Vec3.distance(blindspots[b].position, myAvPos);
+                volumeEval = universeVolume * ((distEval - blindspots[b].occultationRadius)/(blindspots[b].influenceRadius - blindspots[b].occultationRadius));
+                if (volumeEval < 0) { 
+                    volumeEval = 0;
+                }
+                if (universeVolume > volumeEval) { 
+                    universeVolume = volumeEval; 
+                }
+            }
+            // ######### END UNIVERSE SOUD VOLUME MANAGEMENT ########
         }
     } 
 
