@@ -204,17 +204,20 @@
             
             //######### UNIVERSE SOUD VOLUME MANAGEMENT ##############
             var universeVolume = UNIVERSE_SOUND_VOLUME_MAXIMUM;
-            var volumeEval, distEval;
-            for (var b = 0; b < blindspots.length; b++) {
-                distEval = Vec3.distance(blindspots[b].position, myAvPos);
-                volumeEval = universeVolume * ((distEval - blindspots[b].occultationRadius)/(blindspots[b].influenceRadius - blindspots[b].occultationRadius));
-                if (volumeEval < 0) { 
-                    volumeEval = 0;
-                }
-                if (universeVolume > volumeEval) { 
-                    universeVolume = volumeEval; 
+            if (blindspots.length !== 0) {
+                var volumeEval, distEval;
+                for (var b = 0; b < blindspots.length; b++) {
+                    distEval = Vec3.distance(blindspots[b].position, myAvPos);
+                    volumeEval = universeVolume * ((distEval - blindspots[b].occultationRadius)/(blindspots[b].influenceRadius - blindspots[b].occultationRadius));
+                    if (volumeEval < 0) { 
+                        volumeEval = 0;
+                    }
+                    if (universeVolume > volumeEval) { 
+                        universeVolume = volumeEval; 
+                    }
                 }
             }
+            universeSoundInjector.setOptions({"volume": universeVolume});
             // ######### END UNIVERSE SOUD VOLUME MANAGEMENT ########
         }
     } 
